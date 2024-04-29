@@ -369,6 +369,13 @@ def _ogre_node_helper( doc, ob, prefix='', pos=None, rot=None, scl=None ):
         v = swap(rot)
     else:
         v = swap( mat.to_quaternion() )
+
+    # Adjust light node rotation to acomodate differences between Blender and OGRE
+    if ob.type == 'LIGHT' and config.get('SWAP_AXIS') == 'xz-y':
+        logger.debug("Adjusting rotation of light: \"%s\"" % ob.name)
+        opengl_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X') @ mat
+        v = opengl_matrix.to_quaternion()
+
     q = doc.createElement('rotation')   #('quaternion')
     q.setAttribute('qx', '%6f' % v.x)
     q.setAttribute('qy', '%6f' % v.y)
