@@ -5,9 +5,10 @@ from bpy.props import *
 logger = logging.getLogger('config')
 
 AXIS_MODES =  [
-    ('xyz', 'xyz', 'No Axis swapping'),
-    ('xz-y', 'xz-y', 'Ogre standard'),
-    ('-xzy', '-xzy', 'Non standard'),
+    ('xyz', 'xyz', 'No Axis swapping (Right-Handed, Z-Up, X-Right)'),
+    ('xz-y', 'xz-y', 'OGRE/OpenGL standard (Right-Handed, Y-Up, X-Right)'),
+    ('-xzy', '-xzy', 'Non standard (Right-Handed, Y-Up, X-Left)'),
+    ('xzy', 'xzy', 'DirectX standard (Left-Handed, Y-Up, X-Right)'),
 ]
 
 MESH_TOOL_VERSIONS = [

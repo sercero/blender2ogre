@@ -366,9 +366,10 @@ def _ogre_node_helper( doc, ob, prefix='', pos=None, rot=None, scl=None ):
     o.appendChild(p)
 
     if rot:
-        v = swap(rot)
+        v = swap_quat(rot)
     else:
-        v = swap( mat.to_quaternion() )
+        v = swap_quat( mat.to_quaternion() )
+
     q = doc.createElement('rotation')   #('quaternion')
     q.setAttribute('qx', '%6f' % v.x)
     q.setAttribute('qy', '%6f' % v.y)
@@ -464,7 +465,6 @@ def ogre_document(materials, path):
         skybox.setAttribute('material', skybox_name )
         #skybox.setAttribute('distance', '5000')
         #skybox.setAttribute('drawFirst', 'true')
-        skybox.setAttribute('active', 'true')
 
     return doc
 

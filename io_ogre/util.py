@@ -473,20 +473,44 @@ def image_magick( image, origin_filepath, target_filepath, separate_channel=None
     logger.debug('image magick: "%s"', ' '.join(cmd))
     subprocess.call(cmd)
 
+conversion_matrices = {
+
+# Identity Matrix
+    'xyz': mathutils.Matrix((
+    (1.0, 0.0, 0.0),
+    (0.0, 1.0, 0.0),
+    (0.0, 0.0, 1.0),
+    )),
+
+# Matrix that converts from Blender coordinates to OGRE/OpenGL coordinates
+    'xz-y': mathutils.Matrix((
+    (1.0, 0.0,  0.0), # X remains the same
+    (0.0, 0.0, -1.0), # Y in Blender becomes -Z in OGRE/OpenGL
+    (0.0, 1.0,  0.0), # Z in Blender becomes Y in OGRE/OpenGL
+    )),
+
+# Matrix that converts from Blender coordinates to "Unknown"
+    '-xzy': mathutils.Matrix((
+    (-1.0, 0.0, 0.0), # X becomes negative
+    ( 0.0, 0.0, 1.0), # Y in Blender becomes Z
+    ( 0.0, 1.0, 0.0), # Z in Blender becomes Y
+    )),
+
+# Matrix that converts from Blender coordinates to DirectX
+    'xzy': mathutils.Matrix((
+    (1.0, 0.0, 0.0),  # X remains the same
+    (0.0, 0.0, 1.0),  # Y in Blender becomes Z in DirectX
+    (0.0, 1.0, 0.0),  # Z in Blender becomes Y in DirectX
+    ))
+}
+
 def swap(vec):
-    if config.get('SWAP_AXIS') == 'xyz': return vec
-    elif config.get('SWAP_AXIS') == 'xzy':
-        if len(vec) == 3: return mathutils.Vector( [vec.x, vec.z, vec.y] )
-        elif len(vec) == 4: return mathutils.Quaternion( [ vec.w, vec.x, vec.z, vec.y] )
-    elif config.get('SWAP_AXIS') == '-xzy':
-        if len(vec) == 3: return mathutils.Vector( [-vec.x, vec.z, vec.y] )
-        elif len(vec) == 4: return mathutils.Quaternion( [ vec.w, -vec.x, vec.z, vec.y] )
-    elif config.get('SWAP_AXIS') == 'xz-y':
-        if len(vec) == 3: return mathutils.Vector( [vec.x, vec.z, -vec.y] )
-        elif len(vec) == 4: return mathutils.Quaternion( [ vec.w, vec.x, vec.z, -vec.y] )
-    else:
-        logging.warn( 'unknown swap axis mode %s', config.get('SWAP_AXIS') )
-        assert 0
+    return vec @ conversion_matrices[config.get('SWAP_AXIS')]
+
+def swap_quat(quat):
+    vec = mathutils.Vector((quat.x, quat.y, quat.z)) @ conversion_matrices[config.get('SWAP_AXIS')]
+    return mathutils.Quaternion((quat.w, vec.x, vec.y, vec.z))
+
 
 def uid(ob):
     if ob.uid == 0:
